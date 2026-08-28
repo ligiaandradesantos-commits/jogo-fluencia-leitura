@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fluência Leitora</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f8ff;
+      text-align: center;
+      padding: 30px;
+      color: #333;
+    }
+
+    .caixa {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #3157a4;
+    }
+
+    select, button, input {
+      font-size: 18px;
+      padding: 12px;
+      margin: 8px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      cursor: pointer;
+      background: #3157a4;
+      color: white;
+      border: none;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #palavra {
+      font-size: 52px;
+      font-weight: bold;
+      margin: 40px 0;
+      color: #222;
+    }
+
+    #tempo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    #resultado {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+
+    .botoes {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="caixa">
+
+    <h1>📚 Fluência Leitora</h1>
+
+    <p>Leia o maior número de palavras que conseguir em 1 minuto!</p>
+
+    <input
+      type="text"
+      id="nome"
+      placeholder="Digite seu primeiro nome"
+      maxlength="20"
+    >
+
+    <br>
+
+    <label for="nivel">Escolha o nível:</label>
+
+    <select id="nivel">
+      <option value="1">Nível 1</option>
+      <option value="2">Nível 2</option>
+      <option value="3">Nível 3</option>
+      <option value="4">Nível 4</option>
+    </select>
+
+    <br>
+
+    <button id="iniciar" onclick="iniciarJogo()">▶ Começar</button>
+
+    <div id="jogo" style="display:none;">
+
+      <p id="tempo">⏱️ Tempo: 60 segundos</p>
+
+      <div id="palavra"></div>
+
+      <div class="botoes" id="botoes">
+
+        <button onclick="acertou()">✅ Li certo</button>
+
+        <button onclick="errou()">❌ Errei / Pular</button>
+
+      </div>
+
+    </div>
+
+    <div id="resultado"></div>
+
+  </div>
+
+<script>
+
+const palavras = {
+
+  1: [
+    "casa",
+    "bola",
+    "gato",
+    "pato",
+    "mala",
+    "dado",
+    "fada",
+    "sapo",
+    "rato",
+    "boca",
+    "dedo",
+    "vela",
+    "lata",
+    "mesa",
+    "cama",
+    "lobo",
+    "mapa",
+    "pipa",
+    "vaca",
+    "foca"
+  ],
+
+  2: [
+    "banana",
+    "boneca",
+    "camisa",
+    "tomate",
+    "menina",
+    "menino",
+    "sapato",
+    "panela",
+    "peteca",
+    "cavalo",
+    "pipoca",
+    "macaco",
+    "janela",
+    "caneta",
+    "batata",
+    "pirata",
+    "salada",
+    "cabide",
+    "bigode",
+    "moeda"
+  ],
+
+  3: [
+    "borboleta",
+    "telefone",
+    "bicicleta",
+    "gelatina",
+    "camiseta",
+    "marinheiro",
+    "formiga",
+    "abacaxi",
+    "melancia",
+    "elefante",
+    "dinossauro",
+    "chocolate",
+    "passarinho",
+    "parafuso",
+    "capacete",
+    "caderno",
+    "girassol",
+    "jacaré",
+    "sorvete",
+    "caramelo"
+  ],
+
+  4: [
+    "brinco",
+    "prato",
+    "trator",
+    "blusa",
+    "planta",
+    "fruta",
+    "grilo",
+    "cravo",
+    "chave",
+    "chuva",
+    "folha",
+    "milho",
+    "ninho",
+    "palhaço",
+    "coelho",
+    "queijo",
+    "guerra",
+    "carro",
+    "passagem",
+    "estrela",
+    "brinquedo",
+    "floresta",
+    "dragão",
+    "problema",
+    "trabalho"
+  ]
+
+};
+
+let lista = [];
+let indice = 0;
+let pontos = 0;
+let erros = 0;
+let tempo = 60;
+let cronometro;
+
+function embaralhar(array) {
+  return [...array].sort(() => Math.random() - 0.5);
+}
+
+function iniciarJogo() {
+
+  const nome = document.getElementById("nome").value.trim();
+
+  if (nome === "") {
+    alert("Digite seu primeiro nome para começar.");
+    return;
+  }
+
+  const nivel = document.getElementById("nivel").value;
+
+  lista = embaralhar(palavras[nivel]);
+
+  indice = 0;
+  pontos = 0;
+  erros = 0;
+  tempo = 60;
+
+  document.getElementById("resultado").innerHTML = "";
+  document.getElementById("jogo").style.display = "block";
+  document.getElementById("botoes").style.display = "block";
+  document.getElementById("iniciar").disabled = true;
+  document.getElementById("nivel").disabled = true;
+  document.getElementById("nome").disabled = true;
+
+  mostrarPalavra();
+
+  document.getElementById("tempo").innerHTML =
+    "⏱️ Tempo: " + tempo + " segundos";
+
+  cronometro = setInterval(function() {
+
+    tempo--;
+
+    document.getElementById("tempo").innerHTML =
+      "⏱️ Tempo: " + tempo + " segundos";
+
+    if (tempo <= 0) {
+      finalizarJogo();
+    }
+
+  }, 1000);
+}
+
+function mostrarPalavra() {
+
+  if (indice >= lista.length) {
+    lista = embaralhar(lista);
+    indice = 0;
+  }
+
+  document.getElementById("palavra").innerText = lista[indice];
+}
+
+function acertou() {
+
+  pontos++;
+  indice++;
+
+  mostrarPalavra();
+}
+
+function errou() {
+
+  erros++;
+  indice++;
+
+  mostrarPalavra();
+}
+
+function finalizarJogo() {
+
+  clearInterval(cronometro);
+
+  const nome = document.getElementById("nome").value;
+  const nivel = document.getElementById("nivel").value;
+
+  document.getElementById("botoes").style.display = "none";
+  document.getElementById("palavra").innerText = "⏰ Tempo encerrado!";
+
+  document.getElementById("resultado").innerHTML =
+    "<strong>" + nome + "</strong><br>" +
+    "Nível " + nivel + "<br><br>" +
+    "🏆 Palavras lidas corretamente: <strong>" + pontos + "</strong><br>" +
+    "Palavras puladas/erradas: " + erros +
+    "<br><br><button onclick='reiniciar()'>🔄 Jogar novamente</button>";
+}
+
+function reiniciar() {
+
+  document.getElementById("jogo").style.display = "none";
+  document.getElementById("resultado").innerHTML = "";
+
+  document.getElementById("iniciar").disabled = false;
+  document.getElementById("nivel").disabled = false;
+  document.getElementById("nome").disabled = false;
+}
+
+</script>
+
+</body>
+</html>
