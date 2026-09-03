@@ -3,68 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fluência Leitora</title>
+  <title>Descubra a Palavra</title>
 
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f4f8ff;
       text-align: center;
-      padding: 30px;
+      padding: 20px;
       color: #333;
     }
 
     .caixa {
-      max-width: 600px;
+      max-width: 650px;
       margin: auto;
       background: white;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 25px;
+      border-radius: 22px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.12);
     }
 
     h1 {
       color: #3157a4;
+      font-size: 32px;
     }
 
-    select, button, input {
-      font-size: 18px;
-      padding: 12px;
-      margin: 8px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      cursor: pointer;
-      background: #3157a4;
-      color: white;
-      border: none;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    #palavra {
-      font-size: 52px;
+    #fase {
+      font-size: 20px;
       font-weight: bold;
-      margin: 40px 0;
-      color: #222;
+      margin-bottom: 10px;
     }
 
-    #tempo {
+    #placar {
+      font-size: 18px;
+      margin: 15px 0;
+    }
+
+    #imagem {
+      font-size: 110px;
+      margin: 25px 0;
+    }
+
+    .opcao {
+      display: block;
+      width: 90%;
+      max-width: 450px;
+      margin: 12px auto;
+      padding: 16px;
+      font-size: 25px;
+      font-weight: bold;
+      border: none;
+      border-radius: 15px;
+      background: #e5edff;
+      cursor: pointer;
+    }
+
+    .opcao:hover {
+      background: #d2dfff;
+    }
+
+    #mensagem {
       font-size: 24px;
       font-weight: bold;
+      min-height: 35px;
+      margin: 20px;
+    }
+
+    #proxima,
+    #jogarNovamente {
+      padding: 14px 25px;
+      font-size: 20px;
+      border: none;
+      border-radius: 12px;
+      background: #3157a4;
+      color: white;
+      cursor: pointer;
+    }
+
+    #proxima {
+      display: none;
+    }
+
+    #jogarNovamente {
+      display: none;
+      margin-top: 20px;
     }
 
     #resultado {
       font-size: 24px;
-      margin-top: 20px;
+      font-weight: bold;
+      line-height: 1.6;
     }
 
-    .botoes {
-      display: none;
+    footer {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #666;
     }
   </style>
 </head>
@@ -73,272 +107,354 @@
 
   <div class="caixa">
 
-    <h1>📚 FLUÊNCIA LEITORA</h1>
+    <h1>📚 DESCUBRA A PALAVRA</h1>
 
-    <p>LEIA O MAIOR NÚMERO DE PALAVRAS QUE CONSEGUIR EM 1 MINUTO!</p>
+    <div id="fase">QUESTÃO 1 DE 20</div>
 
-    <input
-      type="text"
-      id="nome"
-      placeholder="DIGITE SEU PRIMEIRO NOME"
-      maxlength="20"
-    >
-
-    <br>
-
-    <label for="nivel">ESCOLHA O NÍVEL:</label>
-
-    <select id="nivel">
-      <option value="1">NÍVEL 1</option>
-      <option value="2">NÍVEL 2</option>
-      <option value="3">NÍVEL 3</option>
-      <option value="4">NÍVEL 4</option>
-    </select>
-
-    <br>
-
-    <button id="iniciar" onclick="iniciarJogo()">▶ COMEÇAR</button>
-
-    <div id="jogo" style="display:none;">
-
-      <p id="tempo">⏱️ TEMPO: 60 SEGUNDOS</p>
-
-      <div id="palavra"></div>
-
-      <div class="botoes" id="botoes">
-
-        <button onclick="acertou()">✅ LI CERTO</button>
-
-        <button onclick="errou()">❌ ERREI / PULAR</button>
-        <footer style="margin-top: 30px; font-size: 14px;">
-  © 2026 Professora Lígia Andrade — Todos os direitos reservados.
-</footer>
-
-      </div>
-
+    <div id="placar">
+      ✅ ACERTOS: 0 &nbsp;&nbsp; ❌ ERROS: 0
     </div>
 
+    <div id="imagem">🐱</div>
+
+    <div id="opcoes"></div>
+
+    <div id="mensagem"></div>
+
+    <button id="proxima" onclick="proximaPergunta()">
+      PRÓXIMA ➜
+    </button>
+
     <div id="resultado"></div>
+
+    <button id="jogarNovamente" onclick="jogarNovamente()">
+      🔄 JOGAR NOVAMENTE
+    </button>
+
+    <footer>
+      © 2026 Professora Lígia Andrade — Todos os direitos reservados.
+    </footer>
 
   </div>
 
 <script>
 
-const palavras = {
+const perguntas = [
 
-  1: [
-    "CASA",
-    "BOLA",
-    "GATO",
-    "PATO",
-    "MALA",
-    "DADO",
-    "FADA",
-    "SAPO",
-    "RATO",
-    "BOCA",
-    "DEDO",
-    "VELA",
-    "LATA",
-    "MESA",
-    "CAMA",
-    "LOBO",
-    "MAPA",
-    "PIPA",
-    "VACA",
-    "FOCA"
-  ],
+  {
+    imagem: "🐱",
+    correta: "GATO",
+    opcoes: ["GATO", "PATO", "GALO"]
+  },
 
-  2: [
-    "BANANA",
-    "BONECA",
-    "CAMISA",
-    "TOMATE",
-    "MENINA",
-    "MENINO",
-    "SAPATO",
-    "PANELA",
-    "PETECA",
-    "CAVALO",
-    "PIPOCA",
-    "MACACO",
-    "JANELA",
-    "CANETA",
-    "BATATA",
-    "PIRATA",
-    "SALADA",
-    "CABIDE",
-    "BIGODE",
-    "MOEDA"
-  ],
+  {
+    imagem: "⚽",
+    correta: "BOLA",
+    opcoes: ["BOLA", "BOTA", "BALA"]
+  },
 
-  3: [
-    "BORBOLETA",
-    "TELEFONE",
-    "BICICLETA",
-    "GELATINA",
-    "CAMISETA",
-    "MARINHEIRO",
-    "FORMIGA",
-    "ABACAXI",
-    "MELANCIA",
-    "ELEFANTE",
-    "DINOSSAURO",
-    "CHOCOLATE",
-    "PASSARINHO",
-    "PARAFUSO",
-    "CAPACETE",
-    "CADERNO",
-    "GIRASSOL",
-    "JACARÉ",
-    "SORVETE",
-    "CARAMELO"
-  ],
+  {
+    imagem: "🍇",
+    correta: "UVA",
+    opcoes: ["UVA", "ASA", "OVO"]
+  },
 
-  4: [
-    "BRINCO",
-    "PRATO",
-    "TRATOR",
-    "BLUSA",
-    "PLANTA",
-    "FRUTA",
-    "GRILO",
-    "CRAVO",
-    "CHAVE",
-    "CHUVA",
-    "FOLHA",
-    "MILHO",
-    "NINHO",
-    "PALHAÇO",
-    "COELHO",
-    "QUEIJO",
-    "GUERRA",
-    "CARRO",
-    "PASSAGEM",
-    "ESTRELA",
-    "BRINQUEDO",
-    "FLORESTA",
-    "DRAGÃO",
-    "PROBLEMA",
-    "TRABALHO"
-  ]
+  {
+    imagem: "🐸",
+    correta: "SAPO",
+    opcoes: ["SAPO", "SACO", "SABÃO"]
+  },
 
-};
+  {
+    imagem: "🏠",
+    correta: "CASA",
+    opcoes: ["CASA", "CAMA", "CANA"]
+  },
 
-let lista = [];
-let indice = 0;
-let pontos = 0;
+  {
+    imagem: "🦆",
+    correta: "PATO",
+    opcoes: ["PATO", "GATO", "RATO"]
+  },
+
+  {
+    imagem: "🐭",
+    correta: "RATO",
+    opcoes: ["RATO", "GATO", "MATO"]
+  },
+
+  {
+    imagem: "👜",
+    correta: "MALA",
+    opcoes: ["MALA", "MOLA", "MATA"]
+  },
+
+  {
+    imagem: "🍰",
+    correta: "BOLO",
+    opcoes: ["BOLO", "BOLA", "BICO"]
+  },
+
+  {
+    imagem: "🎲",
+    correta: "DADO",
+    opcoes: ["DADO", "DEDO", "DADO"]
+  },
+
+  {
+    imagem: "🕯️",
+    correta: "VELA",
+    opcoes: ["VELA", "VACA", "VILA"]
+  },
+
+  {
+    imagem: "🥫",
+    correta: "LATA",
+    opcoes: ["LATA", "LAMA", "LAPA"]
+  },
+
+  {
+    imagem: "🛏️",
+    correta: "CAMA",
+    opcoes: ["CAMA", "CANA", "CARA"]
+  },
+
+  {
+    imagem: "🏍️",
+    correta: "MOTO",
+    opcoes: ["MOTO", "MATO", "MOLA"]
+  },
+
+  {
+    imagem: "🧚",
+    correta: "FADA",
+    opcoes: ["FADA", "FITA", "FACA"]
+  },
+
+  {
+    imagem: "🪁",
+    correta: "PIPA",
+    opcoes: ["PIPA", "PINO", "PIPA"]
+  },
+
+  {
+    imagem: "🐺",
+    correta: "LOBO",
+    opcoes: ["LOBO", "LOJA", "LODO"]
+  },
+
+  {
+    imagem: "🐄",
+    correta: "VACA",
+    opcoes: ["VACA", "VAGA", "VILA"]
+  },
+
+  {
+    imagem: "🐟",
+    correta: "PEIXE",
+    opcoes: ["PEIXE", "PEITO", "PEIXÃO"]
+  },
+
+  {
+    imagem: "🐒",
+    correta: "MACACO",
+    opcoes: ["MACACO", "MALA", "MARTE"]
+  }
+
+];
+
+let perguntaAtual = 0;
+let acertos = 0;
 let erros = 0;
-let tempo = 60;
-let cronometro;
+let respondeu = false;
+
+
+/* EMBARALHA AS TRÊS ALTERNATIVAS */
 
 function embaralhar(array) {
-  return [...array].sort(() => Math.random() - 0.5);
+
+  const copia = [...array];
+
+  for (let i = copia.length - 1; i > 0; i--) {
+
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+
+  }
+
+  return copia;
 }
 
-function iniciarJogo() {
 
-  const nome = document.getElementById("nome").value.trim();
+function carregarPergunta() {
 
-  if (nome === "") {
-    alert("DIGITE SEU PRIMEIRO NOME PARA COMEÇAR.");
+  respondeu = false;
+
+  const pergunta = perguntas[perguntaAtual];
+
+  document.getElementById("fase").innerText =
+    "QUESTÃO " + (perguntaAtual + 1) + " DE 20";
+
+  document.getElementById("placar").innerText =
+    "✅ ACERTOS: " + acertos +
+    "     ❌ ERROS: " + erros;
+
+  document.getElementById("imagem").innerText =
+    pergunta.imagem;
+
+  document.getElementById("mensagem").innerText = "";
+
+  document.getElementById("proxima").style.display = "none";
+
+  const opcoes = document.getElementById("opcoes");
+
+  opcoes.innerHTML = "";
+
+
+  /* AQUI AS RESPOSTAS SÃO EMBARALHADAS */
+
+  const opcoesEmbaralhadas = embaralhar(pergunta.opcoes);
+
+
+  opcoesEmbaralhadas.forEach(function(palavra) {
+
+    const botao = document.createElement("button");
+
+    botao.className = "opcao";
+
+    botao.innerText = palavra.toUpperCase();
+
+    botao.onclick = function() {
+
+      verificarResposta(palavra);
+
+    };
+
+    opcoes.appendChild(botao);
+
+  });
+
+}
+
+
+function verificarResposta(resposta) {
+
+  if (respondeu) {
+
     return;
+
   }
 
-  const nivel = document.getElementById("nivel").value;
+  const pergunta = perguntas[perguntaAtual];
 
-  lista = embaralhar(palavras[nivel]);
 
-  indice = 0;
-  pontos = 0;
-  erros = 0;
-  tempo = 60;
+  if (
+    resposta.toUpperCase() ===
+    pergunta.correta.toUpperCase()
+  ) {
 
-  document.getElementById("resultado").innerHTML = "";
-  document.getElementById("jogo").style.display = "block";
-  document.getElementById("botoes").style.display = "block";
-  document.getElementById("iniciar").disabled = true;
-  document.getElementById("nivel").disabled = true;
-  document.getElementById("nome").disabled = true;
+    acertos++;
 
-  mostrarPalavra();
+    respondeu = true;
 
-  document.getElementById("tempo").innerHTML =
-    "⏱️ TEMPO: " + tempo + " SEGUNDOS";
+    document.getElementById("mensagem").innerText =
+      "🎉 MUITO BEM! ⭐";
 
-  cronometro = setInterval(function() {
+  } else {
 
-    tempo--;
+    erros++;
 
-    document.getElementById("tempo").innerHTML =
-      "⏱️ TEMPO: " + tempo + " SEGUNDOS";
+    respondeu = true;
 
-    if (tempo <= 0) {
-      finalizarJogo();
-    }
+    document.getElementById("mensagem").innerText =
+      "💭 NÃO FOI ESSA!";
 
-  }, 1000);
-}
-
-function mostrarPalavra() {
-
-  if (indice >= lista.length) {
-    lista = embaralhar(lista);
-    indice = 0;
   }
 
-  document.getElementById("palavra").innerText =
-    lista[indice].toUpperCase();
+
+  document.getElementById("placar").innerText =
+    "✅ ACERTOS: " + acertos +
+    "     ❌ ERROS: " + erros;
+
+  document.getElementById("proxima").style.display =
+    "inline-block";
+
 }
 
-function acertou() {
 
-  pontos++;
-  indice++;
+function proximaPergunta() {
 
-  mostrarPalavra();
+  perguntaAtual++;
+
+  if (perguntaAtual < perguntas.length) {
+
+    carregarPergunta();
+
+  } else {
+
+    finalizarJogo();
+
+  }
+
 }
 
-function errou() {
-
-  erros++;
-  indice++;
-
-  mostrarPalavra();
-}
 
 function finalizarJogo() {
 
-  clearInterval(cronometro);
+  document.getElementById("fase").innerText =
+    "🏆 DESAFIO CONCLUÍDO!";
 
-  const nome = document.getElementById("nome").value;
-  const nivel = document.getElementById("nivel").value;
+  document.getElementById("imagem").innerText =
+    "🌟";
 
-  document.getElementById("botoes").style.display = "none";
-  document.getElementById("palavra").innerText = "⏰ TEMPO ENCERRADO!";
+  document.getElementById("opcoes").innerHTML = "";
+
+  document.getElementById("mensagem").innerText = "";
+
+  document.getElementById("proxima").style.display =
+    "none";
+
+
+  const porcentagem =
+    Math.round((acertos / 20) * 100);
+
 
   document.getElementById("resultado").innerHTML =
-    "<strong>" + nome.toUpperCase() + "</strong><br>" +
-    "NÍVEL " + nivel + "<br><br>" +
-    "🏆 PALAVRAS LIDAS CORRETAMENTE: <strong>" + pontos + "</strong><br>" +
-    "PALAVRAS PULADAS/ERRADAS: " + erros +
-    "<br><br><button onclick='reiniciar()'>🔄 JOGAR NOVAMENTE</button>";
+    "PARABÉNS! 🎉<br><br>" +
+    "Você respondeu 20 palavras.<br><br>" +
+    "✅ ACERTOS: " + acertos + "<br>" +
+    "❌ ERROS: " + erros + "<br>" +
+    "📊 APROVEITAMENTO: " + porcentagem + "%";
+
+
+  document.getElementById("jogarNovamente").style.display =
+    "inline-block";
+
 }
 
-function reiniciar() {
 
-  document.getElementById("jogo").style.display = "none";
+function jogarNovamente() {
+
+  perguntaAtual = 0;
+
+  acertos = 0;
+
+  erros = 0;
+
   document.getElementById("resultado").innerHTML = "";
 
-  document.getElementById("iniciar").disabled = false;
-  document.getElementById("nivel").disabled = false;
-  document.getElementById("nome").disabled = false;
+  document.getElementById("jogarNovamente").style.display =
+    "none";
+
+  carregarPergunta();
+
 }
+
+
+carregarPergunta();
 
 </script>
 
-  <footer style="margin-top: 30px; font-size: 14px;">
-  © 2026 Professora Lígia Andrade — Todos os direitos reservados.
-</footer>
 </body>
 </html>
